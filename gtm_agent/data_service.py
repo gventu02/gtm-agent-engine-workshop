@@ -78,6 +78,15 @@ def update_prospect_info(prospect_id, technology):
     if record is None:
         return {"updated": False, "found": False}
     tech_stack = list(record["tech_stack"])
-    if technology not in tech_stack:
+    added = technology not in record["tech_stack"]
+    if added:
         tech_stack.append(technology)
-    return {"updated": True, "found": True, "tech_stack": tech_stack}
+    record["tech_stack"] = tech_stack
+    # build_prospect_profile serves from _PROFILES, so invalidate its pre-update copy.
+    _PROFILES.pop(prospect_id, None)
+    return {
+        "updated": added,
+        "already_present": not added,
+        "found": True,
+        "tech_stack": tech_stack,
+    }
